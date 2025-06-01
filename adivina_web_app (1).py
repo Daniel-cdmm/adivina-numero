@@ -72,7 +72,7 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
 
 # Mostrar ranking y botón para volver a jugar
 if st.session_state.ganador:
-    st.subheader("🏆 Ranking de Ganadores (Menos intentos primero)")
+    st.subheader("🏆 Ranking de Ganadores")
     if os.path.exists("ranking.csv"):
         ranking = pd.read_csv("ranking.csv")
         st.dataframe(ranking.head(10))
