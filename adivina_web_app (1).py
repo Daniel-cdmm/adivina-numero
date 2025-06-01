@@ -3,10 +3,9 @@ import random
 import pandas as pd
 import os
 
-# Título principal
 st.title("🎯 ¡Adivina el Número Secreto!")
 
-# Inicializar sesión de estado
+# Estado inicial
 if "nombre" not in st.session_state:
     st.session_state.nombre = ""
 if "juego_iniciado" not in st.session_state:
@@ -20,7 +19,7 @@ if "mensaje" not in st.session_state:
 if "ganador" not in st.session_state:
     st.session_state.ganador = False
 
-# Registro del nombre
+# Pantalla de inicio
 if not st.session_state.juego_iniciado:
     st.subheader("📝 Ingresa tu nombre para comenzar:")
     nombre_input = st.text_input("Nombre del jugador", value=st.session_state.nombre)
@@ -36,7 +35,7 @@ if not st.session_state.juego_iniciado:
         else:
             st.warning("⚠️ Por favor, ingresa tu nombre antes de jugar.")
 
-# Juego
+# Juego en curso
 if st.session_state.juego_iniciado and not st.session_state.ganador:
     st.write(f"👤 Jugador: {st.session_state.nombre}")
     st.write(f"🔢 Intento #{st.session_state.intentos + 1} / 10")
@@ -51,11 +50,8 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
             st.session_state.mensaje = "🔼 Muy alto."
         else:
             st.session_state.ganador = True
-            if st.session_state.intentos == 1:
-                st.success("🎉 ¡Increíble! Adivinaste en el primer intento.")
-            else:
-                st.success(f"✅ ¡Correcto! Adivinaste en {st.session_state.intentos} intentos.")
-            # Guardar en el ranking
+            st.success(f"✅ ¡Correcto! Adivinaste en {st.session_state.intentos} intentos.")
+            # Guardar resultado
             nuevo_registro = pd.DataFrame({
                 "Jugador": [st.session_state.nombre],
                 "Intentos": [st.session_state.intentos]
@@ -74,12 +70,12 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
 
     st.write(st.session_state.mensaje)
 
-# Ranking
+# Mostrar ranking y botón para volver a jugar
 if st.session_state.ganador:
     st.subheader("🏆 Ranking de Ganadores (Menos intentos primero)")
     if os.path.exists("ranking.csv"):
         ranking = pd.read_csv("ranking.csv")
-        st.dataframe(ranking.head(10))  # Mostrar solo top 10
+        st.dataframe(ranking.head(10))
 
     if st.button("🔁 Jugar otra vez"):
         st.session_state.juego_iniciado = False
@@ -87,8 +83,3 @@ if st.session_state.ganador:
         st.session_state.intentos = 0
         st.session_state.mensaje = ""
         st.session_state.ganador = False
-
-    if st.button("🧹 Reiniciar todo"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.experimental_rerun()
