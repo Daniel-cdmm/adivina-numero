@@ -51,8 +51,7 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
         else:
             st.session_state.ganador = True
             if st.session_state.intentos == 1:
-                st.balloons()
-                st.success("🎉 ¡Increíble! Adivinaste el número en el primer intento.")
+                st.success("🎉 ¡Increíble! ¡Lo adivinaste en el primer intento!")
             else:
                 st.success(f"✅ ¡Correcto! Adivinaste en {st.session_state.intentos} intentos.")
             
@@ -77,7 +76,7 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
 
 # Mostrar ranking y botón para volver a jugar
 if st.session_state.ganador:
-    st.subheader("🏆 Ranking de Ganadores (Menos intentos primero)")
+    st.subheader("🏆 Ranking de Ganadores")
     if os.path.exists("ranking.csv"):
         ranking = pd.read_csv("ranking.csv")
         st.dataframe(ranking.head(10))
