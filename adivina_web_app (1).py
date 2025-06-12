@@ -54,11 +54,9 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
     st.write(f"👤 Jugador: {st.session_state.nombre}")
     st.write(f"🔢 Intento #{st.session_state.intentos + 1} / 10")
 
-    with st.form("formulario_juego"):
-        entrada = st.text_input("Adivina el número secreto (1 a 100)", value=st.session_state.entrada_numero, max_chars=3, key="numero")
-        enviar = st.form_submit_button("🚀 Intentar")
+    entrada = st.text_input("Adivina el número secreto (1 a 100)", value=st.session_state.entrada_numero, max_chars=3, key="numero")
 
-    if enviar:
+    if st.button("🚀 Intentar"):
         # sonido al intentar
         st.markdown("""
             <audio autoplay>
@@ -72,21 +70,17 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                 st.session_state.intentos += 1
                 if numero < st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔽 Muy bajo."
-                    st.session_state.entrada_numero = ""
+                    st.session_state.entrada_numero = ""  # limpiar campo
                 elif numero > st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔼 Muy alto."
-                    st.session_state.entrada_numero = ""
+                    st.session_state.entrada_numero = ""  # limpiar campo
                 else:
                     st.session_state.ganador = True
                     st.session_state.tiempo_total = round(time.time() - st.session_state.inicio_tiempo, 2)
 
-                    if st.session_state.intentos == 1:
-                        st.balloons()
-                        st.success("🎉 ¡Increíble! Adivinaste el número en el primer intento.")
-                    else:
-                        st.success(f"✅ ¡Correcto! Adivinaste en {st.session_state.intentos} intentos.")
-                    
+                    st.success(f"✅ ¡Correcto! Adivinaste en {st.session_state.intentos} intentos.")
                     st.success(f"⏱️ Tiempo total: {st.session_state.tiempo_total} segundos.")
+                    st.balloons()
 
                     # sonido de éxito
                     st.markdown("""
