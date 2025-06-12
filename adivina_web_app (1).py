@@ -24,6 +24,8 @@ if "inicio_tiempo" not in st.session_state:
     st.session_state.inicio_tiempo = 0
 if "tiempo_total" not in st.session_state:
     st.session_state.tiempo_total = 0
+if "entrada_numero" not in st.session_state:
+    st.session_state.entrada_numero = ""
 
 # Pantalla inicial
 if not st.session_state.juego_iniciado:
@@ -41,7 +43,7 @@ if not st.session_state.juego_iniciado:
                 st.session_state.ganador = False
                 st.session_state.inicio_tiempo = time.time()
                 st.session_state.tiempo_total = 0
-                st.session_state.input_key = str(time.time())  # clave única para limpiar input
+                st.session_state.entrada_numero = ""
             else:
                 st.warning("⚠️ El nombre solo debe contener letras.")
         else:
@@ -53,23 +55,11 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
     st.write(f"🔢 Intento #{st.session_state.intentos + 1} / 10")
 
     with st.form("formulario_juego"):
-        # Campo numérico personalizado (teclado numérico en móvil)
-        st.markdown("""
-            <input id="numero" name="numero" type="number" placeholder="Tu número" style="width:100%;padding:10px;font-size:16px;border-radius:5px;" />
-            <script>
-                const input = window.parent.document.querySelector('input[name=numero]');
-                if (input) {
-                    input.focus();
-                }
-            </script>
-        """, unsafe_allow_html=True)
+        entrada = st.text_input("Adivina el número secreto (1 a 100)", value=st.session_state.entrada_numero, max_chars=3, key="numero")
         enviar = st.form_submit_button("🚀 Intentar")
 
-    # Simular entrada numérica desde JS input
-    entrada = st.experimental_get_query_params().get("numero", [""])[0]
-
     if enviar:
-        # Sonido al intentar
+        # sonido al intentar
         st.markdown("""
             <audio autoplay>
                 <source src="https://www.soundjay.com/button/beep-01a.mp3" type="audio/mpeg">
@@ -82,10 +72,10 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                 st.session_state.intentos += 1
                 if numero < st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔽 Muy bajo."
-                    st.session_state.input_key = str(time.time())  # fuerza reinicio
+                    st.session_state.entrada_numero = ""
                 elif numero > st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔼 Muy alto."
-                    st.session_state.input_key = str(time.time())
+                    st.session_state.entrada_numero = ""
                 else:
                     st.session_state.ganador = True
                     st.session_state.tiempo_total = round(time.time() - st.session_state.inicio_tiempo, 2)
@@ -95,17 +85,17 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                         st.success("🎉 ¡Increíble! Adivinaste el número en el primer intento.")
                     else:
                         st.success(f"✅ ¡Correcto! Adivinaste en {st.session_state.intentos} intentos.")
-
+                    
                     st.success(f"⏱️ Tiempo total: {st.session_state.tiempo_total} segundos.")
 
-                    # Sonido de éxito
+                    # sonido de éxito
                     st.markdown("""
                         <audio autoplay>
                             <source src="https://www.soundjay.com/human/sounds/applause-8.mp3" type="audio/mpeg">
                         </audio>
                     """, unsafe_allow_html=True)
 
-                    # Guardar en ranking
+                    # guardar en ranking
                     nuevo_registro = pd.DataFrame({
                         "Jugador": [st.session_state.nombre],
                         "Intentos": [st.session_state.intentos],
@@ -129,7 +119,7 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
         st.error("❌ Has alcanzado el máximo de 10 intentos. El número era: " + str(st.session_state.numero_secreto))
         st.session_state.ganador = True
 
-        # Sonido de error
+        # sonido de error
         st.markdown("""
             <audio autoplay>
                 <source src="https://www.soundjay.com/button/beep-07.wav" type="audio/wav">
@@ -153,4 +143,4 @@ if st.session_state.ganador:
         st.session_state.ganador = False
         st.session_state.inicio_tiempo = time.time()
         st.session_state.tiempo_total = 0
-        st.session_state.input_key = str(time.time())
+        st.session_state.entrada_numero = ""
