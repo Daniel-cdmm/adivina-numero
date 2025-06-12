@@ -7,7 +7,7 @@ import time
 
 st.title("🎯 ¡Adivina el Número Secreto!")
 
-# Inicialización de variables
+# Inicialización
 if "nombre" not in st.session_state:
     st.session_state.nombre = ""
 if "juego_iniciado" not in st.session_state:
@@ -20,14 +20,12 @@ if "mensaje" not in st.session_state:
     st.session_state.mensaje = ""
 if "ganador" not in st.session_state:
     st.session_state.ganador = False
-if "entrada_numero" not in st.session_state:
-    st.session_state.entrada_numero = ""
 if "inicio_tiempo" not in st.session_state:
     st.session_state.inicio_tiempo = 0
 if "tiempo_total" not in st.session_state:
     st.session_state.tiempo_total = 0
 
-# Pantalla de inicio
+# Pantalla inicial
 if not st.session_state.juego_iniciado:
     st.subheader("🎮 Ingresa tu nombre para comenzar:")
     nombre_input = st.text_input("Nombre del jugador", value=st.session_state.nombre)
@@ -41,8 +39,9 @@ if not st.session_state.juego_iniciado:
                 st.session_state.intentos = 0
                 st.session_state.mensaje = ""
                 st.session_state.ganador = False
-                st.session_state.entrada_numero = ""
                 st.session_state.inicio_tiempo = time.time()
+                st.session_state.tiempo_total = 0
+                st.session_state.input_key = str(time.time())  # clave única para limpiar input
             else:
                 st.warning("⚠️ El nombre solo debe contener letras.")
         else:
@@ -54,27 +53,41 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
     st.write(f"🔢 Intento #{st.session_state.intentos + 1} / 10")
 
     with st.form("formulario_juego"):
-        entrada = st.text_input(
-            "Adivina el número secreto (1 a 100)",
-            value=st.session_state.entrada_numero,
-            max_chars=3
-        )
+        # Campo numérico personalizado (teclado numérico en móvil)
+        st.markdown("""
+            <input id="numero" name="numero" type="number" placeholder="Tu número" style="width:100%;padding:10px;font-size:16px;border-radius:5px;" />
+            <script>
+                const input = window.parent.document.querySelector('input[name=numero]');
+                if (input) {
+                    input.focus();
+                }
+            </script>
+        """, unsafe_allow_html=True)
         enviar = st.form_submit_button("🚀 Intentar")
 
+    # Simular entrada numérica desde JS input
+    entrada = st.experimental_get_query_params().get("numero", [""])[0]
+
     if enviar:
+        # Sonido al intentar
+        st.markdown("""
+            <audio autoplay>
+                <source src="https://www.soundjay.com/button/beep-01a.mp3" type="audio/mpeg">
+            </audio>
+        """, unsafe_allow_html=True)
+
         if entrada.isdigit():
             numero = int(entrada)
             if 1 <= numero <= 100:
                 st.session_state.intentos += 1
                 if numero < st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔽 Muy bajo."
-                    st.session_state.entrada_numero = ""
+                    st.session_state.input_key = str(time.time())  # fuerza reinicio
                 elif numero > st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔼 Muy alto."
-                    st.session_state.entrada_numero = ""
+                    st.session_state.input_key = str(time.time())
                 else:
                     st.session_state.ganador = True
-                    st.session_state.entrada_numero = ""
                     st.session_state.tiempo_total = round(time.time() - st.session_state.inicio_tiempo, 2)
 
                     if st.session_state.intentos == 1:
@@ -125,7 +138,7 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
 
     st.write(st.session_state.mensaje)
 
-# Mostrar ranking y botón para volver a jugar
+# Ranking y reinicio
 if st.session_state.ganador:
     st.subheader("🏆 Ranking de Ganadores (Menos intentos primero)")
     if os.path.exists("ranking.csv"):
@@ -138,6 +151,6 @@ if st.session_state.ganador:
         st.session_state.intentos = 0
         st.session_state.mensaje = ""
         st.session_state.ganador = False
-        st.session_state.entrada_numero = ""
         st.session_state.inicio_tiempo = time.time()
         st.session_state.tiempo_total = 0
+        st.session_state.input_key = str(time.time())
