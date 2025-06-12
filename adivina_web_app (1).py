@@ -34,7 +34,7 @@ if not st.session_state.juego_iniciado:
 
     if st.button("✅ Jugar"):
         if nombre_input.strip() != "":
-            if re.match("^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$", nombre_input):
+            if re.match("^[A-Za-zÁÉÍÓÚáéíóúÑñ\\s]+$", nombre_input):
                 st.session_state.nombre = nombre_input
                 st.session_state.juego_iniciado = True
                 st.session_state.numero_secreto = random.randint(1, 100)
@@ -54,10 +54,16 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
     st.write(f"👤 Jugador: {st.session_state.nombre}")
     st.write(f"🔢 Intento #{st.session_state.intentos + 1} / 10")
 
-    entrada = st.text_input("Adivina el número secreto (1 a 100)", value=st.session_state.entrada_numero, max_chars=3, key="numero")
+    with st.form("formulario"):
+        entrada = st.text_input(
+            "Adivina el número secreto (1 a 100)",
+            value=st.session_state.get("entrada_numero", ""),
+            max_chars=3,
+            key="entrada_numero"
+        )
+        enviar = st.form_submit_button("🚀 Intentar")
 
-    if st.button("🚀 Intentar"):
-        # sonido al intentar
+    if enviar:
         st.markdown("""
             <audio autoplay>
                 <source src="https://www.soundjay.com/button/beep-01a.mp3" type="audio/mpeg">
@@ -70,26 +76,22 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                 st.session_state.intentos += 1
                 if numero < st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔽 Muy bajo."
-                    st.session_state.entrada_numero = ""  # limpiar campo
+                    st.session_state.entrada_numero = ""
                 elif numero > st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔼 Muy alto."
-                    st.session_state.entrada_numero = ""  # limpiar campo
+                    st.session_state.entrada_numero = ""
                 else:
                     st.session_state.ganador = True
                     st.session_state.tiempo_total = round(time.time() - st.session_state.inicio_tiempo, 2)
-
                     st.success(f"✅ ¡Correcto! Adivinaste en {st.session_state.intentos} intentos.")
                     st.success(f"⏱️ Tiempo total: {st.session_state.tiempo_total} segundos.")
                     st.balloons()
-
-                    # sonido de éxito
                     st.markdown("""
                         <audio autoplay>
                             <source src="https://www.soundjay.com/human/sounds/applause-8.mp3" type="audio/mpeg">
                         </audio>
                     """, unsafe_allow_html=True)
 
-                    # guardar en ranking
                     nuevo_registro = pd.DataFrame({
                         "Jugador": [st.session_state.nombre],
                         "Intentos": [st.session_state.intentos],
@@ -112,8 +114,6 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
     if st.session_state.intentos >= 10 and not st.session_state.ganador:
         st.error("❌ Has alcanzado el máximo de 10 intentos. El número era: " + str(st.session_state.numero_secreto))
         st.session_state.ganador = True
-
-        # sonido de error
         st.markdown("""
             <audio autoplay>
                 <source src="https://www.soundjay.com/button/beep-07.wav" type="audio/wav">
@@ -122,7 +122,7 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
 
     st.write(st.session_state.mensaje)
 
-# Ranking y reinicio
+# Mostrar ranking y reinicio
 if st.session_state.ganador:
     st.subheader("🏆 Ranking de Ganadores (Menos intentos primero)")
     if os.path.exists("ranking.csv"):
