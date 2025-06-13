@@ -48,7 +48,6 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
     st.write(f"👤 Jugador: {st.session_state.nombre}")
     st.write(f"🔢 Intento #{st.session_state.intentos + 1} / 10")
 
-    # Campo de entrada con control de estado
     with st.form("formulario_juego"):
         entrada = st.text_input("Adivina el número secreto (1 a 100)", max_chars=3, key="entrada_numero")
         enviar = st.form_submit_button("🚀 Intentar")
@@ -66,10 +65,8 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                 st.session_state.intentos += 1
                 if numero < st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔽 Muy bajo."
-                    st.session_state.entrada_numero = ""
                 elif numero > st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔼 Muy alto."
-                    st.session_state.entrada_numero = ""
                 else:
                     st.session_state.ganador = True
                     st.session_state.tiempo_total = round(time.time() - st.session_state.inicio_tiempo, 2)
@@ -101,8 +98,10 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                 st.warning("⚠️ El número debe estar entre 1 y 100.")
         else:
             st.warning("⚠️ Solo se permiten números.")
-        # Campo limpio después de cada intento
-        st.session_state.entrada_numero = ""
+
+        # Limpiar campo solo si aún no ganó
+        if not st.session_state.ganador:
+            st.session_state.entrada_numero = ""
 
     if st.session_state.intentos >= 10 and not st.session_state.ganador:
         st.error("❌ Has alcanzado el máximo de 10 intentos. El número era: " + str(st.session_state.numero_secreto))
@@ -115,7 +114,7 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
 
     st.write(st.session_state.mensaje)
 
-# Ranking y reiniciar
+# Ranking y volver a jugar
 if st.session_state.ganador:
     st.subheader("🏆 Ranking de Ganadores (Menos intentos primero)")
     if os.path.exists("ranking.csv"):
