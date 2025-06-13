@@ -99,8 +99,8 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
         else:
             st.warning("⚠️ Solo se permiten números.")
 
-        # Limpiar campo solo si aún no ganó
-        if not st.session_state.ganador:
+        # 🔧 Limpiar campo si no ha ganado y existe el key
+        if "entrada_numero" in st.session_state and not st.session_state.ganador:
             st.session_state.entrada_numero = ""
 
     if st.session_state.intentos >= 10 and not st.session_state.ganador:
