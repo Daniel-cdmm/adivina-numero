@@ -23,6 +23,8 @@ if "inicio_tiempo" not in st.session_state:
     st.session_state.inicio_tiempo = 0
 if "tiempo_total" not in st.session_state:
     st.session_state.tiempo_total = 0
+if "entrada_numero" not in st.session_state:
+    st.session_state.entrada_numero = ""
 
 # Pantalla de inicio
 if not st.session_state.juego_iniciado:
@@ -37,7 +39,7 @@ if not st.session_state.juego_iniciado:
             st.session_state.intentos = 0
             st.session_state.mensaje = ""
             st.session_state.ganador = False
-            st.session_state.inicio_tiempo = time.time()  # ⏱️ guardar inicio
+            st.session_state.inicio_tiempo = time.time()
         else:
             st.warning("⚠️ Por favor, ingresa tu nombre antes de jugar.")
 
@@ -46,13 +48,12 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
     st.write(f"👤 Jugador: {st.session_state.nombre}")
     st.write(f"🔢 Intento #{st.session_state.intentos + 1} / 10")
 
-    # Campo numérico tipo texto que se reinicia solo
+    # Campo de entrada con control de estado
     with st.form("formulario_juego"):
-        entrada = st.text_input("Adivina el número secreto (1 a 100)", value="", max_chars=3)
+        entrada = st.text_input("Adivina el número secreto (1 a 100)", max_chars=3, key="entrada_numero")
         enviar = st.form_submit_button("🚀 Intentar")
 
     if enviar:
-        # 🔊 Sonido al intentar
         st.markdown("""
             <audio autoplay>
                 <source src="https://www.soundjay.com/button/beep-01a.mp3" type="audio/mpeg">
@@ -65,24 +66,23 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                 st.session_state.intentos += 1
                 if numero < st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔽 Muy bajo."
+                    st.session_state.entrada_numero = ""
                 elif numero > st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔼 Muy alto."
+                    st.session_state.entrada_numero = ""
                 else:
                     st.session_state.ganador = True
                     st.session_state.tiempo_total = round(time.time() - st.session_state.inicio_tiempo, 2)
 
-                    st.balloons()
                     st.success(f"✅ ¡Correcto! Adivinaste en {st.session_state.intentos} intentos.")
                     st.success(f"⏱️ Tiempo total: {st.session_state.tiempo_total} segundos.")
-
-                    # 🔊 Sonido de éxito
+                    st.balloons()
                     st.markdown("""
                         <audio autoplay>
                             <source src="https://www.soundjay.com/human/sounds/applause-8.mp3" type="audio/mpeg">
                         </audio>
                     """, unsafe_allow_html=True)
 
-                    # Guardar resultado
                     nuevo_registro = pd.DataFrame({
                         "Jugador": [st.session_state.nombre],
                         "Intentos": [st.session_state.intentos],
@@ -101,6 +101,8 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                 st.warning("⚠️ El número debe estar entre 1 y 100.")
         else:
             st.warning("⚠️ Solo se permiten números.")
+        # Campo limpio después de cada intento
+        st.session_state.entrada_numero = ""
 
     if st.session_state.intentos >= 10 and not st.session_state.ganador:
         st.error("❌ Has alcanzado el máximo de 10 intentos. El número era: " + str(st.session_state.numero_secreto))
@@ -113,7 +115,7 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
 
     st.write(st.session_state.mensaje)
 
-# Mostrar ranking y botón para volver a jugar
+# Ranking y reiniciar
 if st.session_state.ganador:
     st.subheader("🏆 Ranking de Ganadores (Menos intentos primero)")
     if os.path.exists("ranking.csv"):
@@ -127,3 +129,4 @@ if st.session_state.ganador:
         st.session_state.mensaje = ""
         st.session_state.ganador = False
         st.session_state.tiempo_total = 0
+        st.session_state.entrada_numero = ""
