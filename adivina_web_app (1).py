@@ -23,8 +23,8 @@ if "inicio_tiempo" not in st.session_state:
     st.session_state.inicio_tiempo = 0
 if "tiempo_total" not in st.session_state:
     st.session_state.tiempo_total = 0
-if "entrada" not in st.session_state:
-    st.session_state.entrada = ""
+if "entrada_numero" not in st.session_state:
+    st.session_state.entrada_numero = ""
 
 # Pantalla de inicio
 if not st.session_state.juego_iniciado:
@@ -40,7 +40,7 @@ if not st.session_state.juego_iniciado:
             st.session_state.mensaje = ""
             st.session_state.ganador = False
             st.session_state.inicio_tiempo = time.time()
-            st.session_state.entrada = ""
+            st.session_state.entrada_numero = ""
         else:
             st.warning("⚠️ Por favor, ingresa tu nombre antes de jugar.")
 
@@ -50,8 +50,15 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
     st.write(f"🔢 Intento #{st.session_state.intentos + 1} / 10")
 
     with st.form("formulario_juego"):
-        entrada = st.text_input("Adivina el número secreto (1 a 100)", value=st.session_state.entrada, max_chars=3)
-        enviar = st.form_submit_button("🚀 Intentar")
+        entrada = st.text_input("Adivina el número secreto (1 a 100)", max_chars=3, key="entrada_numero")
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            enviar = st.form_submit_button("🚀 Intentar")
+        with col2:
+            limpiar = st.form_submit_button("🧹 Limpiar")
+
+    if limpiar:
+        st.session_state.entrada_numero = ""
 
     if enviar:
         st.markdown("""
@@ -66,10 +73,8 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
                 st.session_state.intentos += 1
                 if numero < st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔽 Muy bajo."
-                    st.session_state.entrada = ""
                 elif numero > st.session_state.numero_secreto:
                     st.session_state.mensaje = "🔼 Muy alto."
-                    st.session_state.entrada = ""
                 else:
                     st.session_state.ganador = True
                     st.session_state.tiempo_total = round(time.time() - st.session_state.inicio_tiempo, 2)
@@ -127,4 +132,4 @@ if st.session_state.ganador:
         st.session_state.mensaje = ""
         st.session_state.ganador = False
         st.session_state.tiempo_total = 0
-        st.session_state.entrada = ""
+        st.session_state.entrada_numero = ""
