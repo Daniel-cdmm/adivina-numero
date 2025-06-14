@@ -53,9 +53,10 @@ if st.session_state.juego_iniciado and not st.session_state.ganador:
         entrada = st.text_input("Adivina el número secreto (1 a 100)", max_chars=3, key="entrada_numero")
         enviar = st.form_submit_button("🚀 Intentar")
 
-    # Botón limpiar FUERA del formulario
+    # ✅ Botón limpiar fuera del formulario con st.rerun
     if st.button("🧹 Limpiar"):
         st.session_state.entrada_numero = ""
+        st.rerun()
 
     if enviar:
         st.markdown("""
