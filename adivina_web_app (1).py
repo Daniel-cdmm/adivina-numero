@@ -135,3 +135,9 @@ if st.session_state.ganador:
         st.session_state.ganador = False
         st.session_state.tiempo_total = 0
         st.session_state.entrada = ""
+
+    if st.button("🧹 Reiniciar Ranking"):
+        columnas = ["Jugador", "Intentos", "Tiempo (segundos)"]
+        df_vacio = pd.DataFrame(columns=columnas)
+        df_vacio.to_csv("ranking.csv", index=False)
+        st.success("✅ Ranking reiniciado correctamente.")
